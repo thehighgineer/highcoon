@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dodge Bad Vibes Decision</title>
+  <style>
+    body {
+      background: #f0f6f3;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+    h1 {
+      margin-top: 20px;
+      color: #32527B;
+    }
+    #scene {
+      margin-top: 20px;
+      max-width: 500px;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 16px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      line-height: 1.4;
+    }
+    #choices {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    button.choice {
+      padding: 10px 14px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: #32527B;
+      color: #fff;
+      transition: background 0.2s;
+    }
+    button.choice:hover {
+      background: #2a4163;
+    }
+    #feedback {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dodge Bad Vibes</h1>
+  <div id="scene"></div>
+  <div id="choices"></div>
+  <div id="feedback"></div>
+
+  <script>
+    // Scenes for decision game.  Each scene contains a description,
+    // choices with terpene keys, the correct key and an explanation.
+    const scenes = [
+      {
+        text: 'Highcoon y AMG‑175 corren por los túneles oscuros del STIGMA HQ. Necesitan mantener la calma para descifrar el sistema de seguridad basado en terpenos. ¿Cuál terpene debería inhalar Highcoon para aumentar su enfoque y energía?',
+        choices: [
+          { key: 'limonene', label: 'Limonene' },
+          { key: 'myrcene', label: 'Myrcene' },
+          { key: 'caryophyllene', label: 'β‑Caryophyllene' },
+          { key: 'pinene', label: 'Pinene' }
+        ],
+        correct: 'limonene',
+        explanation: 'Limonene tiene un aroma cítrico y se asocia con una sensación de energía y claridad mental, perfecto para mantener la concentración en situaciones de alta presión.'
+      },
+      {
+        text: 'Más adelante, el túnel se llena de humo tóxico. Highcoon necesita un terpene que le ayude a relajarse y soportar la tensión física. ¿Cuál elige?',
+        choices: [
+          { key: 'limonene', label: 'Limonene' },
+          { key: 'myrcene', label: 'Myrcene' },
+          { key: 'caryophyllene', label: 'β‑Caryophyllene' },
+          { key: 'pinene', label: 'Pinene' }
+        ],
+        correct: 'myrcene',
+        explanation: 'Myrcene posee propiedades relajantes y sedantes, ayudando a aliviar la tensión muscular y preparando el cuerpo para la resistencia.'
+      },
+      {
+        text: 'Finalmente, se encuentran con un sistema láser con un patrón complejo. Highcoon necesita un terpene que agudice su memoria y lo vuelva ágil. ¿Cuál debería usar?',
+        choices: [
+          { key: 'limonene', label: 'Limonene' },
+          { key: 'myrcene', label: 'Myrcene' },
+          { key: 'caryophyllene', label: 'β‑Caryophyllene' },
+          { key: 'pinene', label: 'Pinene' }
+        ],
+        correct: 'pinene',
+        explanation: 'Pinene, con su aroma a pino, mejora la claridad mental y la retención de memoria, ideal para procesar patrones rápidamente y esquivar obstáculos.'
+      }
+    ];
+
+    const terpeneNames = {
+      limonene: 'Limonene',
+      myrcene: 'Myrcene',
+      caryophyllene: 'β‑Caryophyllene',
+      pinene: 'Pinene'
+    };
+
+    let currentSceneIndex = 0;
+    const sceneEl = document.getElementById('scene');
+    const choicesEl = document.getElementById('choices');
+    const feedbackEl = document.getElementById('feedback');
+
+    function renderScene() {
+      const scene = scenes[currentSceneIndex];
+      sceneEl.innerText = scene.text;
+      feedbackEl.innerText = '';
+      choicesEl.innerHTML = '';
+      scene.choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'choice';
+        btn.innerText = choice.label;
+        btn.onclick = () => handleChoice(choice.key);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function handleChoice(key) {
+      const scene = scenes[currentSceneIndex];
+      if (key === scene.correct) {
+        feedbackEl.style.color = '#2a7a2a';
+        feedbackEl.innerText = '¡Correcto! ' + scene.explanation;
+        currentSceneIndex++;
+        if (currentSceneIndex < scenes.length) {
+          // Brief delay before next scene
+          setTimeout(renderScene, 2000);
+        } else {
+          feedbackEl.innerText += '\n\n¡Has ayudado a Highcoon a esquivar las malas vibras y escapar con éxito!';
+          choicesEl.innerHTML = '';
+        }
+      } else {
+        feedbackEl.style.color = '#b53838';
+        feedbackEl.innerText = 'Respuesta incorrecta. Inténtalo de nuevo.';
+      }
+    }
+
+    // Initialize first scene
+    renderScene();
+  </script>
+</body>
+</html>
