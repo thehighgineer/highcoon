@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory de Terpenos</title>
+  <style>
+    body {
+      background: #f0f6f3;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin-top: 20px;
+      color: #32527B;
+    }
+    #gameContainer {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(4, 80px);
+      grid-gap: 10px;
+    }
+    .card {
+      width: 80px;
+      height: 100px;
+      background: #32527B;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      user-select: none;
+      transition: transform 0.3s;
+    }
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+    .card-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backface-visibility: hidden;
+      border-radius: 8px;
+    }
+    .card-front {
+      background: #32527B;
+    }
+    .card-back {
+      background: #fff;
+      color: #222;
+      transform: rotateY(180deg);
+      font-size: 12px;
+      text-align: center;
+      padding: 4px;
+    }
+    #infoPanel {
+      margin-top: 16px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+      width: 320px;
+      min-height: 80px;
+      font-size: 14px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Memory de Terpenos</h1>
+  <div id="gameContainer"></div>
+  <div id="infoPanel">Encuentra las parejas de terpenos.</div>
+
+  <script>
+    const terpeneInfo = {
+      limonene: {
+        name: 'Limonene',
+        color: '#FDCC0D',
+        description: 'Aroma cítrico; efectos de energía y enfoque.'
+      },
+      myrcene: {
+        name: 'Myrcene',
+        color: '#89C857',
+        description: 'Aroma terroso y herbal; induce relajación.'
+      },
+      pinene: {
+        name: 'Pinene',
+        color: '#8FB996',
+        description: 'Aroma a pino; mejora la memoria y claridad.'
+      },
+      caryophyllene: {
+        name: 'β‑Caryophyllene',
+        color: '#9474B0',
+        description: 'Aroma especiado; ayuda a aliviar el estrés.'
+      }
+    };
+
+    // Prepare the deck: two of each terpene
+    let deck = [];
+    Object.keys(terpeneInfo).forEach(key => {
+      deck.push({ key });
+      deck.push({ key });
+    });
+
+    // Shuffle deck using Fisher–Yates
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+
+    const gameContainer = document.getElementById('gameContainer');
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+    let matchedPairs = 0;
+
+    deck.forEach((cardData, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.key = cardData.key;
+      card.dataset.index = index;
+
+      const front = document.createElement('div');
+      front.className = 'card-content card-front';
+      front.innerText = '?';
+      const back = document.createElement('div');
+      back.className = 'card-content card-back';
+      back.style.background = terpeneInfo[cardData.key].color;
+      back.innerHTML = `<strong>${terpeneInfo[cardData.key].name}</strong>`;
+
+      card.appendChild(front);
+      card.appendChild(back);
+      gameContainer.appendChild(card);
+
+      card.addEventListener('click', () => {
+        if (lockBoard || card.classList.contains('matched') || card === firstCard) return;
+        flipCard(card);
+        if (!firstCard) {
+          firstCard = card;
+          return;
+        }
+        secondCard = card;
+        checkForMatch();
+      });
+    });
+
+    function flipCard(card) {
+      card.classList.add('flipped');
+    }
+
+    function unflipCards() {
+      lockBoard = true;
+      setTimeout(() => {
+        firstCard.classList.remove('flipped');
+        secondCard.classList.remove('flipped');
+        resetTurn();
+      }, 1000);
+    }
+
+    function checkForMatch() {
+      const isMatch = firstCard.dataset.key === secondCard.dataset.key;
+      if (isMatch) {
+        disableCards();
+        matchedPairs++;
+        // Show info
+        const info = terpeneInfo[firstCard.dataset.key];
+        showInfo(`<div class=\"terp-name\" style=\"color:${info.color}\">${info.name}</div><div>${info.description}</div>`);
+        if (matchedPairs === deck.length / 2) {
+          showInfo('<strong>¡Bien hecho!</strong> Has encontrado todas las parejas.');
+        }
+      } else {
+        unflipCards();
+      }
+    }
+
+    function disableCards() {
+      firstCard.classList.add('matched');
+      secondCard.classList.add('matched');
+      resetTurn();
+    }
+
+    function resetTurn() {
+      [firstCard, secondCard] = [null, null];
+      lockBoard = false;
+    }
+
+    function showInfo(message) {
+      document.getElementById('infoPanel').innerHTML = message;
+    }
+  </script>
+</body>
+</html>
