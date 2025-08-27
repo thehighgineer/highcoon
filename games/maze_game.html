@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trippy Terpene Trails</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f0f6f3;
+      font-family: sans-serif;
+    }
+    h1 {
+      margin: 10px 0;
+      color: #32527B;
+    }
+    #mazeCanvas {
+      border: 2px solid #32527B;
+      background: #ffffff;
+    }
+    #infoPanel {
+      margin-top: 10px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      width: 300px;
+      min-height: 80px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      font-size: 14px;
+    }
+    .terp-name {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Trippy Terpene Trails</h1>
+  <canvas id="mazeCanvas" width="500" height="500"></canvas>
+  <div id="infoPanel">Recoge los terpenos para aprender sobre ellos.</div>
+
+  <script>
+    // Maze definition (10x10 grid). 1 = wall, 0 = path.
+    const maze = [
+      [1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,1,0,0,0,0,1],
+      [1,0,1,0,1,0,1,1,0,1],
+      [1,0,1,0,0,0,0,1,0,1],
+      [1,0,1,1,1,1,0,1,0,1],
+      [1,0,0,0,0,1,0,0,0,1],
+      [1,1,1,1,0,1,1,1,0,1],
+      [1,0,0,1,0,0,0,1,0,1],
+      [1,0,1,1,1,1,0,1,0,1],
+      [1,1,1,1,1,1,1,1,1,1],
+    ];
+
+    const cellSize = 50; // canvas is 500x500
+
+    const terpeneInfo = {
+      limonene: {
+        name: 'Limonene',
+        color: '#FDCC0D',
+        description: 'Aroma cítrico; se encuentra en cáscaras de cítricos. Efectos: ánimo elevado y enfoque.'
+      },
+      myrcene: {
+        name: 'Myrcene',
+        color: '#89C857',
+        description: 'Aroma terroso y herbal; presente en mangos y lúpulo. Efectos: relajación profunda.'
+      },
+      pinene: {
+        name: 'Pinene',
+        color: '#8FB996',
+        description: 'Aroma a pino; común en agujas de pino y romero. Efectos: claridad mental y memoria.'
+      },
+      caryophyllene: {
+        name: 'β‑Caryophyllene',
+        color: '#9474B0',
+        description: 'Aroma especiado; presente en pimienta negra y clavo. Efectos: alivio del estrés.'
+      }
+    };
+
+    // Positions of terpenes within the maze (grid coordinates and keys)
+    const items = [
+      { x: 1, y: 1, key: 'limonene', collected: false },
+      { x: 4, y: 5, key: 'myrcene', collected: false },
+      { x: 7, y: 7, key: 'pinene', collected: false },
+      { x: 8, y: 3, key: 'caryophyllene', collected: false }
+    ];
+
+    let player = { x: 1, y: 8 };
+    const canvas = document.getElementById('mazeCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function draw() {
+      // Clear
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw maze
+      for (let y = 0; y < 10; y++) {
+        for (let x = 0; x < 10; x++) {
+          if (maze[y][x] === 1) {
+            ctx.fillStyle = '#32527B';
+            ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+          }
+        }
+      }
+      // Draw items
+      items.forEach(item => {
+        if (!item.collected) {
+          const terp = terpeneInfo[item.key];
+          ctx.fillStyle = terp.color;
+          ctx.beginPath();
+          ctx.arc(item.x * cellSize + cellSize / 2, item.y * cellSize + cellSize / 2, cellSize / 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+      // Draw player
+      ctx.fillStyle = '#E77A7A';
+      ctx.beginPath();
+      ctx.arc(player.x * cellSize + cellSize / 2, player.y * cellSize + cellSize / 2, cellSize / 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function showInfo(message) {
+      const panel = document.getElementById('infoPanel');
+      panel.innerHTML = message;
+    }
+
+    function checkItem() {
+      for (const item of items) {
+        if (!item.collected && item.x === player.x && item.y === player.y) {
+          item.collected = true;
+          const terp = terpeneInfo[item.key];
+          showInfo(`<div class="terp-name" style="color:${terp.color}">${terp.name}</div><div>${terp.description}</div>`);
+          if (items.every(i => i.collected)) {
+            showInfo('<strong>¡Felicidades!</strong> Has recogido todos los terpenos.');
+          }
+        }
+      }
+    }
+
+    function move(dx, dy) {
+      const newX = player.x + dx;
+      const newY = player.y + dy;
+      if (maze[newY][newX] === 0) {
+        player.x = newX;
+        player.y = newY;
+        checkItem();
+        draw();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+          move(0, -1);
+          break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          move(0, 1);
+          break;
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          move(-1, 0);
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          move(1, 0);
+          break;
+      }
+    });
+
+    // Initial draw
+    draw();
+    showInfo('Usa las flechas o WASD para moverte.');
+  </script>
+</body>
+</html>
